@@ -1,13 +1,11 @@
 package com.cetin.userpostapi.controller;
 
 import com.cetin.userpostapi.dto.ProductDto;
-import com.cetin.userpostapi.entity.Category;
-import com.cetin.userpostapi.entity.Product;
 import com.cetin.userpostapi.service.ProductService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,27 +18,27 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductDto> fetchAll() {
+    public ResponseEntity<List<ProductDto>> fetchAll() {
         return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
-    public Optional<ProductDto> getProductById(@PathVariable Long id){
+    public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
     }
 
     @PostMapping
-    public void createProduct(@RequestBody ProductDto productDto) {
-        productService.saveProduct(productDto);
+    public ResponseEntity<Void> createProduct(@RequestBody ProductDto productDto) {
+        return productService.saveProduct(productDto);
     }
 
     @PutMapping
-    public void updateProduct(@RequestBody ProductDto productDto) {
-        productService.saveProduct(productDto);
+    public ResponseEntity<Void> updateProduct(@RequestBody ProductDto productDto) {
+        return productService.saveProduct(productDto);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        productService.deleteProduct(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        return productService.deleteProduct(id);
     }
 }

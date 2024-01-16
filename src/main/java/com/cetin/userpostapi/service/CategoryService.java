@@ -7,6 +7,8 @@ import com.cetin.userpostapi.repository.ICategoryRepository;
 import com.cetin.userpostapi.repository.IProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,40 +22,67 @@ public class CategoryService {
     private final IProductRepository productRepository;
     private final ModelMapper modelMapper;
 
-
+    @Autowired
     public CategoryService(ICategoryRepository categoryRepository, IProductRepository productRepository, ModelMapper modelMapper) {
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.modelMapper = modelMapper;
     }
 
-    public void saveCategory(CategoryDto categoryDto) {
+    public ResponseEntity<Void> saveCategory(CategoryDto categoryDto) {
         Category category = modelMapper.map(categoryDto, Category.class);
         categoryRepository.save(category);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    public List<CategoryDto> getAllCategories() {
+    public ResponseEntity<String> updateCategory(Long categoryId, CategoryDto categoryDto) {
+        if (categoryId != null) {
+            Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
+
+            if (optionalCategory.isPresent()) {
+                Category existingCategory = optionalCategory.get();
+                existingCategory.setName(categoryDto.getName());
+                categoryRepository.save(existingCategory);
+
+                return new ResponseEntity<>("Category updated successfully", HttpStatus.NO_CONTENT);
+            } else {
+                return new ResponseEntity<>("Category not found", HttpStatus.NOT_FOUND);
+            }
+        } else {
+            return new ResponseEntity<>("Category ID is missing", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+    public ResponseEntity<List<CategoryDto>> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
-        return categories.stream()
+        List<CategoryDto> categoryDtos = categories.stream()
                 .map(category -> modelMapper.map(category, CategoryDto.class))
                 .collect(Collectors.toList());
+        return new ResponseEntity<>(categoryDtos, HttpStatus.OK);
     }
 
-    public Optional<CategoryDto> getCategoryById(Long id){
+    public ResponseEntity<CategoryDto> getCategoryById(Long id) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
-        return optionalCategory
-                .map(category -> modelMapper.map(category,CategoryDto.class));
+        return optionalCategory.map(category -> new ResponseEntity<>(modelMapper.map(category, CategoryDto.class), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    public void deleteCategory(Long id) {
+    public ResponseEntity<String> deleteCategory(Long id) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
 
         List<Product> optionalProduct = productRepository.findAllByCategoryId(id);
 
         if (!optionalProduct.isEmpty()) {
-            throw new RuntimeException("This category can not delete");
+            return new ResponseEntity<>("This category cannot be deleted because it has associated products.", HttpStatus.BAD_REQUEST);
         }
-        categoryRepository.delete(optionalCategory.get());
 
+        if (optionalCategory.isPresent()) {
+            categoryRepository.delete(optionalCategory.get());
+            return new ResponseEntity<>("Category deleted successfully", HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>("Category not found", HttpStatus.NOT_FOUND);
+        }
     }
+
 }
