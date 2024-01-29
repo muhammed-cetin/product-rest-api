@@ -28,17 +28,17 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<String> createProduct(@RequestBody ProductDto productDto) {
         return productService.saveProduct(productDto);
     }
 
-    @PutMapping
-    public ResponseEntity<Void> updateProduct(@RequestBody ProductDto productDto) {
-        return productService.saveProduct(productDto);
+    @PutMapping("/{title}")
+    public ResponseEntity<String> updateProduct(@PathVariable String title, @RequestBody ProductDto updatedProductDto) {
+        return productService.updateProduct(title, updatedProductDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
         return productService.deleteProduct(id);
     }
 }

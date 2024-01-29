@@ -1,3 +1,5 @@
+// CategoryController.java
+
 package com.cetin.userpostapi.controller;
 
 import com.cetin.userpostapi.dto.CategoryDto;
@@ -18,7 +20,7 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryDto>> fetchAll() {
+    public ResponseEntity<List<CategoryDto>> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
